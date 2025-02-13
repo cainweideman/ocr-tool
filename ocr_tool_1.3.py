@@ -1,7 +1,9 @@
 import os
 import cv2
+import json
 import pytesseract
 import tkinter as tk
+from datetime import datetime
 from PIL import Image, ImageTk
 from tkinter import ttk, messagebox, filedialog, Menu
 
@@ -297,6 +299,9 @@ class ImageProcessorApp:
 
         txt_button = ttk.Button(button_frame, text="Save as .txt", command=lambda: self.save_as_txt(ocr_text))
         txt_button.pack(side=tk.LEFT, padx=5)
+
+        json_button = ttk.Button(button_frame, text='Save as JSON', command=lambda: self.save_as_json(ocr_text))
+        json_button.pack(side=tk.RIGHT, padx=5)
     
     def show_psm(self):
         psm_options = """
@@ -335,6 +340,28 @@ class ImageProcessorApp:
             with open(filepath, 'w', encoding='utf-8') as file:
                 file.write(text)
             messagebox.showinfo("Success", f"Text saved to {filepath}")
+        
+    def save_as_json(self, text):
+        if text is None:
+            return
+        
+        page_dict = {
+            'file_name': os.path.split(self.image_path)[-1],
+            'date': str(datetime.now()),
+            'text': text
+        }
+
+        page_object = json.dumps(page_dict, indent=4)
+        filepath = filedialog.asksaveasfilename(
+            title='Save as JSON',
+            defaultextension='.json',
+            filetypes=(('JSON files', '*.json'), ('All files', '*.*'))
+        )
+
+        if filepath:
+            with open(filepath, 'w', encoding='utf-8') as file:
+                file.write(page_object)
+            messagebox.showinfo('Succes', f'Text saved to {filepath}')
 
     def make_pdf(self):
         if self.binary_image is None:

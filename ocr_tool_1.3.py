@@ -54,7 +54,6 @@ class ImageProcessorApp:
         self.help_menu = tk.Menu(self.menubar, tearoff=0)
         self.menubar.add_cascade(label="Help", menu=self.help_menu)
         self.help_menu.add_command(label="PSM Help", command=self.show_psm)
-        self.help_menu.add_command(label="About")
 
         # Bind keyboard shortcuts
         self.root.bind('<Control-o>', lambda e: self.select_file())
@@ -68,11 +67,11 @@ class ImageProcessorApp:
         self.image_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=10, pady=10)
 
         # Canvas for original image
-        self.original_canvas = tk.Canvas(self.image_frame, bg="grey")
+        self.original_canvas = tk.Canvas(self.image_frame, bg='grey')
         self.original_canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
         # Canvas for processed image
-        self.processed_canvas = tk.Canvas(self.image_frame, bg="grey")
+        self.processed_canvas = tk.Canvas(self.image_frame, bg='grey')
         self.processed_canvas.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
 
         # Control Frame
@@ -90,7 +89,7 @@ class ImageProcessorApp:
         self.ocr_button = ttk.Button(self.ocr_frame, text='Perform OCR', command=self.perform_ocr)
         self.ocr_button.grid(row=1, column=0, padx=5, pady=5, columnspan=3, sticky='nsew')
 
-        self.config_label = ttk.Label(self.ocr_frame, text='Page Segmentation:')
+        self.config_label = ttk.Label(self.ocr_frame, text='PSM mode:')
         self.config_label.grid(row=0, column=0, padx=5, pady=10, columnspan=2)
 
         self.config_menu = ttk.OptionMenu(self.ocr_frame, self.selected_config, *self.config_list)

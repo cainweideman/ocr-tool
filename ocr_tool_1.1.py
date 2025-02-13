@@ -1,3 +1,4 @@
+import os
 import cv2
 import pytesseract
 import tkinter as tk
@@ -10,6 +11,8 @@ class ImageProcessorApp:
         self.root.title("OCR-tool")
 
         # Variables
+        self.folder_path = None
+        self.file_list = None
         self.image_path = None
         self.preprocessor = None
         self.original_image = None
@@ -36,8 +39,20 @@ class ImageProcessorApp:
         self.toolbar_frame.pack(fill=tk.X, padx=5, pady=5)
 
         # Button to open image
-        self.open_button = ttk.Button(self.toolbar_frame, text="Open Image", command=self.open_image)
-        self.open_button.pack(side=tk.LEFT, padx=5, pady=5)
+        self.open_file_button = ttk.Button(self.toolbar_frame, text="Select File", command=self.select_file)
+        self.open_file_button.pack(side=tk.LEFT, padx=5, pady=5)
+
+        # Button to open image
+        self.open_folder_button = ttk.Button(self.toolbar_frame, text="Select Folder", command=self.select_folder)
+        self.open_folder_button.pack(side=tk.LEFT, padx=5, pady=5)
+
+        # Button to previous image
+        self.previous_button = ttk.Button(self.toolbar_frame, text="<", command=self.previous_file, state='disabled')
+        self.previous_button.pack(side=tk.LEFT, padx=5, pady=5)
+
+        # Button to next image
+        self.next_button = ttk.Button(self.toolbar_frame, text=">", command=self.next_file, state='disabled')
+        self.next_button.pack(side=tk.LEFT, padx=5, pady=5)
 
         # Button to save image
         self.save_button = ttk.Button(self.toolbar_frame, text='Save image', command=self.save_image)
@@ -119,11 +134,26 @@ class ImageProcessorApp:
         # Configure grid weights
         self.control_frame.columnconfigure(0, weight=1)
         self.control_frame.columnconfigure(1, weight=1)
-
-    def open_image(self):
+    
+    def select_file(self):
         self.image_path = filedialog.askopenfilename(
             filetypes=[("Image Files", "*.png *.jpg *.jpeg *.bmp *.gif")]
         )
+        self.open_image()
+        self.folder_path = None
+        self.next_button['state'] = 'disabled'
+        self.previous_button['state'] = 'disabled'
+    
+    def select_folder(self):
+        self.folder_path = filedialog.askdirectory()
+        self.file_list = None
+        self.file_list = sorted(os.listdir(self.folder_path))
+        self.image_path = os.path.join(self.folder_path, self.file_list[0])
+        self.open_image()
+        self.next_button['state'] = 'normal'
+        self.previous_button['state'] = 'normal'
+
+    def open_image(self):
         if self.image_path:
             try:
                 self.original_image = cv2.imread(self.image_path)
@@ -134,6 +164,24 @@ class ImageProcessorApp:
 
             except Exception as e:
                 print(f"Error opening image: {e}")
+    
+    def next_file(self):
+        if self.image_path is not None and self.folder_path is not None:
+            temp_path = os.path.split(self.image_path)[-1]
+            if temp_path != self.file_list[-1]:
+                index = self.file_list.index(temp_path)
+                self.image_path = os.path.join(self.folder_path, self.file_list[index + 1])
+                self.open_image()
+                self.crop_image()
+    
+    def previous_file(self):
+        if self.image_path is not None and self.folder_path is not None:
+            temp_path = os.path.split(self.image_path)[-1]
+            if temp_path != self.file_list[0]:
+                index = self.file_list.index(temp_path)
+                self.image_path = os.path.join(self.folder_path, self.file_list[index - 1])
+                self.open_image()
+                self.crop_image()
 
     def display_image(self, image, canvas):
         """Display the image on the canvas while maintaining aspect ratio."""

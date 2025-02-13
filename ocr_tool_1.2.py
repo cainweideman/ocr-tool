@@ -1,8 +1,9 @@
+import os
 import cv2
 import pytesseract
 import tkinter as tk
 from PIL import Image, ImageTk
-from tkinter import ttk, messagebox, filedialog
+from tkinter import ttk, messagebox, filedialog, Menu
 
 class ImageProcessorApp:
     def __init__(self, root):
@@ -10,6 +11,8 @@ class ImageProcessorApp:
         self.root.title("OCR-tool")
 
         # Variables
+        self.folder_path = None
+        self.file_list = None
         self.image_path = None
         self.preprocessor = None
         self.original_image = None
@@ -31,29 +34,47 @@ class ImageProcessorApp:
         self.root.bind("<Configure>", self.on_window_resize)
 
     def create_widgets(self):
-        # Toolbar Frame
+        self.menubar = tk.Menu(self.root)
+        self.root.config(menu=self.menubar)
+
+        # File Menu
+        self.file_menu = Menu(self.menubar, tearoff=0)
+        self.menubar.add_cascade(label="File", menu=self.file_menu)
+        self.file_menu.add_command(label="Open File...", command=self.select_file, accelerator="Ctrl+O")
+        self.file_menu.add_command(label="Open Folder...", command=self.select_folder, accelerator="Ctrl+F")
+        self.file_menu.add_separator()
+        self.file_menu.add_command(label="Save Image...", command=self.save_image, accelerator="Ctrl+S")
+        self.file_menu.add_command(label="Save as PDF...", command=self.make_pdf, accelerator="Ctrl+P")
+        self.file_menu.add_separator()
+        self.file_menu.add_command(label="Exit", command=self.root.quit, accelerator="Alt+F4")
+
+        # Help Menu
+        self.help_menu = tk.Menu(self.menubar, tearoff=0)
+        self.menubar.add_cascade(label="Help", menu=self.help_menu)
+        self.help_menu.add_command(label="PSM Help", command=self.show_psm)
+        self.help_menu.add_command(label="About")
+
+        # Bind keyboard shortcuts
+        self.root.bind('<Control-o>', lambda e: self.select_file())
+        self.root.bind('<Control-f>', lambda e: self.select_folder())
+        self.root.bind('<Control-s>', lambda e: self.save_image())
+        self.root.bind('<Control-p>', lambda e: self.make_pdf())
+        self.root.bind('<Control-r>', lambda e: self.perform_ocr())
+
         self.toolbar_frame = ttk.Frame(self.root)
         self.toolbar_frame.pack(fill=tk.X, padx=5, pady=5)
 
-        # Button to open image
-        self.open_button = ttk.Button(self.toolbar_frame, text="Open Image", command=self.open_image)
-        self.open_button.pack(side=tk.LEFT, padx=5, pady=5)
+        # Button to previous image
+        self.previous_button = ttk.Button(self.toolbar_frame, text="<", command=self.previous_file, state='disabled')
+        self.previous_button.pack(side=tk.LEFT, padx=5, pady=5)
 
-        # Button to save image
-        self.save_button = ttk.Button(self.toolbar_frame, text='Save image', command=self.save_image)
-        self.save_button.pack(side=tk.RIGHT, padx=5, pady=5)
-
-        # Button to make PDF
-        self.pdf_button = ttk.Button(self.toolbar_frame, text="Save as PDF", command=self.make_pdf)
-        self.pdf_button.pack(side=tk.RIGHT, padx=5, pady=5)
+        # Button to next image
+        self.next_button = ttk.Button(self.toolbar_frame, text=">", command=self.next_file, state='disabled')
+        self.next_button.pack(side=tk.LEFT, padx=5, pady=5)
 
         # Button to perform OCR
         self.ocr_button = ttk.Button(self.toolbar_frame, text='OCR', command=self.perform_ocr)
         self.ocr_button.pack(side=tk.RIGHT, padx=5, pady=5)
-
-        # PSM helper
-        self.psm_help = ttk.Button(self.toolbar_frame, text='ⓘ', command=self.show_psm)
-        self.psm_help.pack(side=tk.RIGHT)
 
         # Option menu
         self.config_menu = ttk.OptionMenu(self.toolbar_frame, self.selected_config, *self.config_list)
@@ -120,10 +141,25 @@ class ImageProcessorApp:
         self.control_frame.columnconfigure(0, weight=1)
         self.control_frame.columnconfigure(1, weight=1)
 
-    def open_image(self):
+    def select_file(self):
         self.image_path = filedialog.askopenfilename(
             filetypes=[("Image Files", "*.png *.jpg *.jpeg *.bmp *.gif")]
         )
+        self.open_image()
+        self.folder_path = None
+        self.next_button['state'] = 'disabled'
+        self.previous_button['state'] = 'disabled'
+    
+    def select_folder(self):
+        self.folder_path = filedialog.askdirectory()
+        self.file_list = None
+        self.file_list = sorted(os.listdir(self.folder_path))
+        self.image_path = os.path.join(self.folder_path, self.file_list[0])
+        self.open_image()
+        self.next_button['state'] = 'normal'
+        self.previous_button['state'] = 'normal'
+
+    def open_image(self):
         if self.image_path:
             try:
                 self.original_image = cv2.imread(self.image_path)
@@ -134,6 +170,24 @@ class ImageProcessorApp:
 
             except Exception as e:
                 print(f"Error opening image: {e}")
+    
+    def next_file(self):
+        if self.image_path is not None and self.folder_path is not None:
+            temp_path = os.path.split(self.image_path)[-1]
+            if temp_path != self.file_list[-1]:
+                index = self.file_list.index(temp_path)
+                self.image_path = os.path.join(self.folder_path, self.file_list[index + 1])
+                self.open_image()
+                self.crop_image()
+    
+    def previous_file(self):
+        if self.image_path is not None and self.folder_path is not None:
+            temp_path = os.path.split(self.image_path)[-1]
+            if temp_path != self.file_list[0]:
+                index = self.file_list.index(temp_path)
+                self.image_path = os.path.join(self.folder_path, self.file_list[index - 1])
+                self.open_image()
+                self.crop_image()
 
     def display_image(self, image, canvas):
         """Display the image on the canvas while maintaining aspect ratio."""

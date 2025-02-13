@@ -61,19 +61,6 @@ class ImageProcessorApp:
         self.root.bind('<Control-p>', lambda e: self.make_pdf())
         self.root.bind('<Control-r>', lambda e: self.perform_ocr())
 
-        '''
-        # Button to perform OCR
-        self.ocr_button = ttk.Button(self.toolbar_frame, text='OCR', command=self.perform_ocr)
-        self.ocr_button.pack(side=tk.RIGHT, padx=5, pady=5)
-
-        # Option menu
-        self.config_menu = ttk.OptionMenu(self.toolbar_frame, self.selected_config, *self.config_list)
-        self.config_menu.pack(side=tk.RIGHT, padx=5, pady=5)
-
-        # PSM label
-        self.config_label = ttk.Label(self.toolbar_frame, text='psm:')
-        self.config_label.pack(side=tk.RIGHT, padx=5, pady=5)
-        '''
         # Image Display Frame
         self.image_frame = ttk.Frame(self.root)
         self.image_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=10, pady=10)

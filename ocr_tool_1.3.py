@@ -162,6 +162,7 @@ class ImageProcessorApp:
         self.file_list = sorted(os.listdir(self.folder_path))
         self.image_path = os.path.join(self.folder_path, self.file_list[0])
         self.open_image()
+        self.crop_image()
         self.next_button['state'] = 'normal'
         self.previous_button['state'] = 'normal'
 

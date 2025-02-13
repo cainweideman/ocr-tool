@@ -61,17 +61,7 @@ class ImageProcessorApp:
         self.root.bind('<Control-p>', lambda e: self.make_pdf())
         self.root.bind('<Control-r>', lambda e: self.perform_ocr())
 
-        self.toolbar_frame = ttk.Frame(self.root)
-        self.toolbar_frame.pack(fill=tk.X, padx=5, pady=5)
-
-        # Button to previous image
-        self.previous_button = ttk.Button(self.toolbar_frame, text="<", command=self.previous_file, state='disabled')
-        self.previous_button.pack(side=tk.LEFT, padx=5, pady=5)
-
-        # Button to next image
-        self.next_button = ttk.Button(self.toolbar_frame, text=">", command=self.next_file, state='disabled')
-        self.next_button.pack(side=tk.LEFT, padx=5, pady=5)
-
+        '''
         # Button to perform OCR
         self.ocr_button = ttk.Button(self.toolbar_frame, text='OCR', command=self.perform_ocr)
         self.ocr_button.pack(side=tk.RIGHT, padx=5, pady=5)
@@ -83,7 +73,7 @@ class ImageProcessorApp:
         # PSM label
         self.config_label = ttk.Label(self.toolbar_frame, text='psm:')
         self.config_label.pack(side=tk.RIGHT, padx=5, pady=5)
-
+        '''
         # Image Display Frame
         self.image_frame = ttk.Frame(self.root)
         self.image_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=10, pady=10)
@@ -97,49 +87,78 @@ class ImageProcessorApp:
         self.processed_canvas.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
 
         # Control Frame
-        self.control_frame = ttk.Frame(self.root)
-        self.control_frame.pack(side=tk.RIGHT, padx=5, pady=5)
+        self.control_frame = tk.Frame(self.root)
+        self.control_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=False)
 
-        self.crop_label = ttk.Label(self.control_frame, text='Crop Image:')
+        self.control_frame.grid_rowconfigure(0, weight=1)
+        self.control_frame.grid_rowconfigure(1, weight=1)
+        self.control_frame.grid_rowconfigure(2, weight=1)
+
+        # OCR
+        self.ocr_frame = tk.Frame(self.control_frame)
+        self.ocr_frame.grid(row=0, sticky='n')
+
+        self.ocr_button = ttk.Button(self.ocr_frame, text='Perform OCR', command=self.perform_ocr)
+        self.ocr_button.grid(row=1, column=0, padx=5, pady=5, columnspan=3, sticky='nsew')
+
+        self.config_label = ttk.Label(self.ocr_frame, text='Page Segmentation:')
+        self.config_label.grid(row=0, column=0, padx=5, pady=10, columnspan=2)
+
+        self.config_menu = ttk.OptionMenu(self.ocr_frame, self.selected_config, *self.config_list)
+        self.config_menu.grid(row=0, column=2, padx=5, pady=10)
+
+        # Cropping
+        self.crop_frame = tk.Frame(self.control_frame)
+        self.crop_frame.grid(row=1)
+
+        self.crop_label = ttk.Label(self.crop_frame, text='Crop Image:')
         self.crop_label.grid(row=0, column=0, columnspan=2, pady=10)
 
-        # Slider for crop fraction
-        self.crop_all_label = ttk.Label(self.control_frame, text="All")
+        self.crop_all_label = ttk.Label(self.crop_frame, text="All")
         self.crop_all_label.grid(row=1, column=0, padx=0, pady=0)
-        self.crop_all_slider = ttk.Scale(self.control_frame, variable=self.crop_all_fraction, from_=0.0, to=0.25, orient=tk.HORIZONTAL, length=100, command=self.update_crop_all_fraction)
+        self.crop_all_slider = ttk.Scale(self.crop_frame, variable=self.crop_all_fraction, from_=0.0, to=0.25, orient=tk.HORIZONTAL, length=100, command=self.update_crop_all_fraction)
         self.crop_all_slider.grid(row=1, column=1, padx=10, pady=10)
 
-        self.crop_top_label = ttk.Label(self.control_frame, text="Top")
-        self.crop_top_label.grid(row=2, column=0, padx=0, pady=0)
-        self.crop_top_slider = ttk.Scale(self.control_frame, variable=self.crop_top_fraction, from_=0.0, to=0.25, orient=tk.HORIZONTAL, length=100, command=self.update_crop_fraction)
-        self.crop_top_slider.grid(row=2, column=1, padx=10, pady=10)
+        self.crop_top_label = ttk.Label(self.crop_frame, text="Top")
+        self.crop_top_label.grid(row=3, column=0, padx=0, pady=0)
+        self.crop_top_slider = ttk.Scale(self.crop_frame, variable=self.crop_top_fraction, from_=0.0, to=0.25, orient=tk.HORIZONTAL, length=100, command=self.update_crop_fraction)
+        self.crop_top_slider.grid(row=3, column=1, padx=10, pady=10)
 
-        self.crop_left_label = ttk.Label(self.control_frame, text="Left")
-        self.crop_left_label.grid(row=3, column=0, padx=0, pady=0)
-        self.crop_left_slider = ttk.Scale(self.control_frame, variable=self.crop_left_fraction, from_=0.0, to=0.25, orient=tk.HORIZONTAL, length=100, command=self.update_crop_fraction)
-        self.crop_left_slider.grid(row=3, column=1, padx=10, pady=10)
+        self.crop_left_label = ttk.Label(self.crop_frame, text="Left")
+        self.crop_left_label.grid(row=4, column=0, padx=0, pady=0)
+        self.crop_left_slider = ttk.Scale(self.crop_frame, variable=self.crop_left_fraction, from_=0.0, to=0.25, orient=tk.HORIZONTAL, length=100, command=self.update_crop_fraction)
+        self.crop_left_slider.grid(row=4, column=1, padx=10, pady=10)
 
-        self.crop_right_label = ttk.Label(self.control_frame, text="Right")
-        self.crop_right_label.grid(row=4, column=0, padx=0, pady=0)
-        self.crop_right_slider = ttk.Scale(self.control_frame, variable=self.crop_right_fraction, from_=0.0, to=0.25, orient=tk.HORIZONTAL, length=100, command=self.update_crop_fraction)
-        self.crop_right_slider.grid(row=4, column=1, padx=10, pady=10)
+        self.crop_right_label = ttk.Label(self.crop_frame, text="Right")
+        self.crop_right_label.grid(row=5, column=0, padx=0, pady=0)
+        self.crop_right_slider = ttk.Scale(self.crop_frame, variable=self.crop_right_fraction, from_=0.0, to=0.25, orient=tk.HORIZONTAL, length=100, command=self.update_crop_fraction)
+        self.crop_right_slider.grid(row=5, column=1, padx=10, pady=10)
 
-        self.crop_bottom_label = ttk.Label(self.control_frame, text="Bottom")
-        self.crop_bottom_label.grid(row=5, column=0, padx=0, pady=0)
-        self.crop_bottom_slider = ttk.Scale(self.control_frame, variable=self.crop_bottom_fraction, from_=0.0, to=0.25, orient=tk.HORIZONTAL, length=100, command=self.update_crop_fraction)
-        self.crop_bottom_slider.grid(row=5, column=1, padx=10, pady=10)
+        self.crop_bottom_label = ttk.Label(self.crop_frame, text="Bottom")
+        self.crop_bottom_label.grid(row=6, column=0, padx=0, pady=0)
+        self.crop_bottom_slider = ttk.Scale(self.crop_frame, variable=self.crop_bottom_fraction, from_=0.0, to=0.25, orient=tk.HORIZONTAL, length=100, command=self.update_crop_fraction)
+        self.crop_bottom_slider.grid(row=6, column=1, padx=10, pady=10)
 
-        # Button to binarize
-        self.binarize_button = ttk.Button(self.control_frame, text='Binarize', command=self.binarize_image)
-        self.binarize_button.grid(row=6, column=0, padx=5, pady=5, columnspan=2)
 
-        # Button to unbinarize
-        self.unbinarize_button = ttk.Button(self.control_frame, text='Reset', command=self.crop_image)
-        self.unbinarize_button.grid(row=7, column=0, padx=5, pady=5, columnspan=2)
+        # Binarizing
+        self.binarize_frame = tk.Frame(self.crop_frame)
+        self.binarize_frame.grid(row=7, column=0, columnspan=2)
 
-        # Configure grid weights
-        self.control_frame.columnconfigure(0, weight=1)
-        self.control_frame.columnconfigure(1, weight=1)
+        self.binarize_button = ttk.Button(self.binarize_frame, text='Binarize', command=self.binarize_image)
+        self.binarize_button.grid(row=0, column=0, padx=5, pady=10)
+
+        self.unbinarize_button = ttk.Button(self.binarize_frame, text='Undo', command=self.crop_image)
+        self.unbinarize_button.grid(row=0, column=1, padx=5, pady=10)
+
+        # Image Buttons
+        self.image_control_frame = tk.Frame(self.control_frame)
+        self.image_control_frame.grid(row=2, sticky='s')
+
+        self.previous_button = ttk.Button(self.image_control_frame, text="Previous", command=self.previous_file, state='disabled')
+        self.previous_button.grid(row=0, column=0, padx=5, pady=10)
+
+        self.next_button = ttk.Button(self.image_control_frame, text="Next", command=self.next_file, state='disabled')
+        self.next_button.grid(row=0, column=1, padx=5, pady=10)
 
     def select_file(self):
         self.image_path = filedialog.askopenfilename(

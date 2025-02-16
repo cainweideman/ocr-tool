@@ -22,6 +22,7 @@ This is a Tkinter-based OCR (Optical Character Recognition) tool that allows use
 Ensure you have Python 3.7 or higher installed. You can download it from:
 [https://www.python.org/downloads/](https://www.python.org/downloads/)
 
+### 2. Install Tesseract OCR
 #### Windows:
 1. **Download Tesseract**:
    - Go to the [Tesseract OCR Installation page](https://github.com/UB-Mannheim/tesseract/wiki).
@@ -70,12 +71,6 @@ brew --version
 #### Install Tesseract using Homebrew:
 ```bash
 brew install tesseract-lang
-```
-
-### 3. Install Python Dependencies
-Run the following command to install the required libraries:
-```sh
-pip install opencv-python pillow pytesseract
 ```
 
 ## Usage

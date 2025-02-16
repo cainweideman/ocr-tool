@@ -13,7 +13,7 @@ This is a Tkinter-based OCR (Optical Character Recognition) tool that allows use
 - User-friendly GUI built with Tkinter.
 
 ## Requirements
-- Python 3.7+
+- Python 3.6+
 - Tesseract
 - OpenCV
 - Tkinter (built-in with Python)
@@ -21,7 +21,7 @@ This is a Tkinter-based OCR (Optical Character Recognition) tool that allows use
 
 ## Installation
 ### 1. Install Python
-Ensure you have Python 3.7 or higher installed. You can download it from:
+Ensure you have Python 3.6 or higher installed. You can download it from:
 [https://www.python.org/downloads/](https://www.python.org/downloads/)
 
 ### 2. Install Tesseract OCR

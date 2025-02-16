@@ -82,7 +82,7 @@ pip install opencv-python pillow pytesseract
 ## Usage
 1. Run the script:
 ```sh
-python ocr_tool_1.3.py
+python ocr_tool.py
 ```
 2. Use the GUI to:
    - Load images.

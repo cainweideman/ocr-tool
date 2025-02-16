@@ -5,6 +5,7 @@ import pytesseract
 import tkinter as tk
 from datetime import datetime
 from PIL import Image, ImageTk
+from typing import List, Optional
 from tkinter import ttk, messagebox, filedialog, Menu
 
 class ImageProcessorApp:
@@ -13,9 +14,9 @@ class ImageProcessorApp:
         self.root.title("OCR-tool")
 
         # Variables
-        self.folder_path = None
-        self.file_list = None
-        self.image_path = None
+        self.folder_path: Optional[str] = None
+        self.file_list: Optional[List[str]] = None
+        self.image_path: Optional[str] = None
         self.preprocessor = None
         self.original_image = None
         self.binary_image = None
@@ -24,8 +25,8 @@ class ImageProcessorApp:
         self.crop_left_fraction = tk.DoubleVar(value=0.0)
         self.crop_right_fraction = tk.DoubleVar(value=0.0)
         self.crop_bottom_fraction = tk.DoubleVar(value=0.0)
-        self.language = 'nld'
-        self.config_list = ['3', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13']
+        self.language: str = 'nld'
+        self.config_list: List[int] = [3, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
         self.selected_config = tk.StringVar(self.root)
         self.resize_after_id = None
 
@@ -35,12 +36,12 @@ class ImageProcessorApp:
         # Bind window resize event
         self.root.bind("<Configure>", self.on_window_resize)
 
-    def create_widgets(self):
+    def create_widgets(self) -> None:
         self.menubar = tk.Menu(self.root)
         self.root.config(menu=self.menubar)
 
         # File Menu
-        self.file_menu = Menu(self.menubar, tearoff=0)
+        self.file_menu = tk.Menu(self.menubar, tearoff=0)
         self.menubar.add_cascade(label="File", menu=self.file_menu)
         self.file_menu.add_command(label="Open File...", command=self.select_file, accelerator="Ctrl+O")
         self.file_menu.add_command(label="Open Folder...", command=self.select_folder, accelerator="Ctrl+F")
@@ -148,8 +149,8 @@ class ImageProcessorApp:
         self.next_button = ttk.Button(self.image_control_frame, text="Next", command=self.next_file, state='disabled')
         self.next_button.grid(row=0, column=1, padx=5, pady=10)
 
-    def select_file(self):
-        self.image_path = filedialog.askopenfilename(
+    def select_file(self) -> None:
+        self.image_path: Optional[str] = filedialog.askopenfilename(
             filetypes=[("Image Files", "*.png *.jpg *.jpeg *.bmp *.gif")]
         )
         self.open_image()
@@ -157,8 +158,8 @@ class ImageProcessorApp:
         self.next_button['state'] = 'disabled'
         self.previous_button['state'] = 'disabled'
     
-    def select_folder(self):
-        self.folder_path = filedialog.askdirectory()
+    def select_folder(self) -> None:
+        self.folder_path: Optional[str] = filedialog.askdirectory()
         self.file_list = None
         self.file_list = sorted(os.listdir(self.folder_path))
         self.image_path = os.path.join(self.folder_path, self.file_list[0])
@@ -167,7 +168,7 @@ class ImageProcessorApp:
         self.next_button['state'] = 'normal'
         self.previous_button['state'] = 'normal'
 
-    def open_image(self):
+    def open_image(self) -> None:
         if self.image_path:
             try:
                 self.original_image = cv2.imread(self.image_path)
@@ -179,25 +180,25 @@ class ImageProcessorApp:
             except Exception as e:
                 print(f"Error opening image: {e}")
     
-    def next_file(self):
+    def next_file(self) -> None:
         if self.image_path is not None and self.folder_path is not None:
-            temp_path = os.path.split(self.image_path)[-1]
+            temp_path: str = os.path.split(self.image_path)[-1]
             if temp_path != self.file_list[-1]:
-                index = self.file_list.index(temp_path)
-                self.image_path = os.path.join(self.folder_path, self.file_list[index + 1])
+                index: int = self.file_list.index(temp_path)
+                self.image_path: str = os.path.join(self.folder_path, self.file_list[index + 1])
                 self.open_image()
                 self.crop_image()
     
-    def previous_file(self):
+    def previous_file(self) -> None:
         if self.image_path is not None and self.folder_path is not None:
-            temp_path = os.path.split(self.image_path)[-1]
+            temp_path: str = os.path.split(self.image_path)[-1]
             if temp_path != self.file_list[0]:
-                index = self.file_list.index(temp_path)
-                self.image_path = os.path.join(self.folder_path, self.file_list[index - 1])
+                index: int = self.file_list.index(temp_path)
+                self.image_path: str = os.path.join(self.folder_path, self.file_list[index - 1])
                 self.open_image()
                 self.crop_image()
 
-    def display_image(self, image, canvas):
+    def display_image(self, image, canvas) -> None:
         """Display the image on the canvas while maintaining aspect ratio."""
         canvas.delete("all")  # Clear the canvas before displaying a new image
 
@@ -207,8 +208,8 @@ class ImageProcessorApp:
         # Calculate the scaled dimensions to fit the canvas
         image_height, image_width = image.shape[:2]
         scale = min(canvas_width / image_width, canvas_height / image_height)
-        new_width = int(image_width * scale)
-        new_height = int(image_height * scale)
+        new_width: int = int(image_width * scale)
+        new_height: int = int(image_height * scale)
 
         # Resize the image using OpenCV
         resized = cv2.resize(image, (new_width, new_height), interpolation=cv2.INTER_AREA)
@@ -221,20 +222,20 @@ class ImageProcessorApp:
         y_offset = (canvas_height - new_height) // 2
         canvas.create_image(x_offset, y_offset, anchor=tk.NW, image=photo)
 
-    def on_window_resize(self, event):
+    def on_window_resize(self, event) -> None:
         """Handle window resize event with a delay to prevent excessive calls."""
         if self.resize_after_id:
             self.root.after_cancel(self.resize_after_id)
         self.resize_after_id = self.root.after(300, self.resize_images)
 
-    def resize_images(self):
+    def resize_images(self) -> None:
         """Resizes and updates displayed images."""
         if self.original_image is not None:
             self.display_image(self.original_image, self.original_canvas)
         if self.binary_image is not None:
             self.display_image(self.binary_image, self.processed_canvas)
 
-    def update_crop_all_fraction(self, value):
+    def update_crop_all_fraction(self, value) -> None:
         all_value = self.crop_all_fraction.get()
         self.crop_top_fraction.set(all_value)
         self.crop_left_fraction.set(all_value)
@@ -244,42 +245,42 @@ class ImageProcessorApp:
         if self.original_image is not None:
             self.crop_image()
 
-    def update_crop_fraction(self, value):
+    def update_crop_fraction(self, value) -> None:
         self.crop_all_fraction.set(0.0)
         if self.original_image is not None:
             self.crop_image()
 
-    def crop_image(self):
+    def crop_image(self) -> None:
         if self.binary_image is not None:
             self.binary_image = self.original_image
             height, width = self.original_image.shape[:2]
-            left = int(width * self.crop_left_fraction.get())
-            top = int(height * self.crop_top_fraction.get())
-            right = int(width * (1 - self.crop_right_fraction.get()))
-            bottom = int(height * (1 - self.crop_bottom_fraction.get()))
+            left: int = int(width * self.crop_left_fraction.get())
+            top: int = int(height * self.crop_top_fraction.get())
+            right: int = int(width * (1 - self.crop_right_fraction.get()))
+            bottom: int = int(height * (1 - self.crop_bottom_fraction.get()))
             self.binary_image = self.binary_image[top:bottom, left:right]
             self.display_image(self.binary_image, self.processed_canvas)
 
-    def binarize_image(self):
+    def binarize_image(self) -> None:
         if self.binary_image is not None:
             self.preprocessor = OCRpreprocessor(self.binary_image)
             self.preprocessor.process()
             self.binary_image = self.preprocessor.binary
             self.display_image(self.binary_image, self.processed_canvas)
 
-    def perform_ocr(self):
+    def perform_ocr(self) -> None:
         if self.binary_image is None:
             messagebox.showwarning("No Image", "Please process an image first.")
             return
         self.ocr_button.config(state='disabled')
 
         # Perform OCR using pytesseract
-        custom_config = f'--oem 3 --psm {self.selected_config.get()}'
-        ocr_text = pytesseract.image_to_string(self.binary_image, lang=self.language, config=custom_config)
+        custom_config: str = f'--oem 3 --psm {self.selected_config.get()}'
+        ocr_text: str = pytesseract.image_to_string(self.binary_image, lang=self.language, config=custom_config)
         self.ocr_button.config(state='normal')
         self.show_ocr_result(ocr_text)
 
-    def show_ocr_result(self, ocr_text):
+    def show_ocr_result(self, ocr_text) -> None:
         if ocr_text is None:
             return
 
@@ -302,8 +303,8 @@ class ImageProcessorApp:
         json_button = ttk.Button(button_frame, text='Save as JSON', command=lambda: self.save_as_json(ocr_text))
         json_button.pack(side=tk.RIGHT, padx=5)
     
-    def show_psm(self):
-        psm_options = """
+    def show_psm(self) -> None:
+        psm_options: str = """
         Page segmentation modes:\n
   0    Orientation and script detection (OSD) only.\n
   1    Automatic page segmentation with OSD.\n
@@ -323,7 +324,7 @@ class ImageProcessorApp:
         """
         tk.messagebox.showinfo(title=None, message=psm_options)
 
-    def save_as_txt(self, text):
+    def save_as_txt(self, text: str) -> None:
         if text is None:
             return
 
@@ -340,7 +341,7 @@ class ImageProcessorApp:
                 file.write(text)
             messagebox.showinfo("Success", f"Text saved to {filepath}")
         
-    def save_as_json(self, text):
+    def save_as_json(self, text: str) -> None:
         if text is None:
             return
         
@@ -362,13 +363,13 @@ class ImageProcessorApp:
                 file.write(page_object)
             messagebox.showinfo('Succes', f'Text saved to {filepath}')
 
-    def make_pdf(self):
+    def make_pdf(self) -> None:
         if self.binary_image is None:
             messagebox.showwarning("No Image", "Please process an image first.")
             return
 
         # Perform OCR using pytesseract with the custom config
-        custom_config = f'--oem 3 --psm {self.selected_config.get()}'
+        custom_config: str = f'--oem 3 --psm {self.selected_config.get()}'
         pdf_data = pytesseract.image_to_pdf_or_hocr(self.binary_image, config=custom_config, lang=self.language, extension='pdf')
 
         # Open file dialog to select where to save the PDF
@@ -384,7 +385,7 @@ class ImageProcessorApp:
                 pdf_file.write(pdf_data)
             messagebox.showinfo("Success", f"PDF saved to {filepath}")
 
-    def save_image(self):
+    def save_image(self) -> None:
         if self.binary_image is not None:
             filepath = filedialog.asksaveasfilename(
                 title='Save processed image',
@@ -405,17 +406,17 @@ class OCRpreprocessor:
         self.binary = None
         self.processed = None
 
-    def get_grayscale(self):
+    def get_grayscale(self) -> None:
         self.gray = cv2.cvtColor(self.original, cv2.COLOR_BGR2GRAY)
         return self
     
-    def remove_noise(self):
+    def remove_noise(self) -> None:
         if self.gray is None:
             self.gray = self.get_grayscale()
         self.gray = cv2.GaussianBlur(self.gray, (1,1), 0)
         return self
     
-    def binarize(self):
+    def binarize(self) -> None:
         if self.gray is None:
             self.gray = self.get_grayscale()
 
@@ -423,7 +424,7 @@ class OCRpreprocessor:
         self.binary = otsu
         return self
 
-    def dilate(self):
+    def dilate(self) -> None:
         """Dilate the image to connect text components"""
         if self.binary is None:
             self.binarize()
@@ -432,7 +433,7 @@ class OCRpreprocessor:
         self.binary = cv2.dilate(self.binary, kernel, iterations=1)
         return self
 
-    def erode(self):
+    def erode(self) -> None:
         """Erode the image to remove small noise"""
         if self.binary is None:
             self.binarize()
@@ -441,7 +442,7 @@ class OCRpreprocessor:
         self.binary = cv2.erode(self.binary, kernel, iterations=1)
         return self
     
-    def process(self):
+    def process(self) -> None:
         return (self.get_grayscale()
                 .remove_noise()
                 .binarize()

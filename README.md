@@ -1,13 +1,15 @@
+![Python Version](https://img.shields.io/badge/Python-3.6%2B-brightgreen)
 # OCR Tool
 
 ## Overview
-This is a Tkinter-based OCR (Optical Character Recognition) tool that allows users to extract text from images using Tesseract OCR. The application provides various image preprocessing options, including binarization, cropping, and filtering, to improve OCR accuracy.
+This is a Tkinter-based OCR (Optical Character Recognition) tool that allows users to extract text from images using Tesseract OCR. The application provides various image preprocessing options, including binarization and cropping, to improve OCR accuracy.
 
 ## Features
 - Load and preprocess images before performing OCR.
-- Apply cropping, binarization, and other filters to enhance text extraction.
-- Process images individually or in batch mode from a selected folder.
-- Export extracted text as JSON.
+- Apply cropping and binarization to enhance text extraction.
+- Automatic binarization using the Otsu method.
+- Extract text using Tesseract's different Page Segmentation Modes.
+- Export extracted text as .txt or JSON.
 - User-friendly GUI built with Tkinter.
 
 ## Requirements

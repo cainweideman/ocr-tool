@@ -72,6 +72,10 @@ brew --version
 ```bash
 brew install tesseract-lang
 ```
+### 3. Install Python Dependencies
+```sh
+pip install opencv-python pillow pytesseract
+```
 
 ## Usage
 1. Run the script:
